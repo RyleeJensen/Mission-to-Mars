@@ -20,6 +20,7 @@ def scrape_all():
       "news_paragraph": news_paragraph,
       "featured_image": featured_image(browser),
       "facts": mars_facts(),
+      "hemispheres": hemispheres(browser),
       "last_modified": dt.datetime.now()
     }
     
@@ -104,6 +105,38 @@ def mars_facts():
 
     # Convert DataFrame back into HTML-ready code
     return df.to_html()
+
+
+def hemispheres(browser):
+    
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+
+    hemisphere_image_urls = []
+    
+    for hemis in range(4):
+        
+        # Browse through each article
+        browser.links.find_by_partial_text('Hemisphere')[hemis].click()
+        
+        # Parse the html
+        html = browser.html
+        hemi_soup = soup(html, 'html.parser')
+        
+        # Scraping
+        title = hemi_soup.find('h2', class_='title').text
+        img_url = hemi_soup.find('li').a.get('href')
+        
+        # Store findings to a dictionary and append to list
+        hemispheres = {}
+        hemispheres['img_url'] = f'https://marshemispheres.com/{img_url}'
+        hemispheres['title'] = title
+        hemisphere_image_urls.append(hemispheres)
+        
+        # Browse back to repeat
+        browser.back()
+        
+    return hemisphere_image_urls
 
 if __name__ == "__main__":
     
